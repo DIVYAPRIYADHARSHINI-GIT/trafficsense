@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TrafficSense</title>
+    <script>
+      // GitHub Pages SPA fallback: unknown paths (e.g. /trafficsense/predict) land here.
+      // Remember the full path, then load the app shell, which restores it (see src/main.jsx).
+      // __BASE__ is replaced with the Vite base path at build time (vite.config.js).
+      (function () {
+        var base = '__BASE__';
+        var l = window.location;
+        try { sessionStorage.setItem('ts-redirect', l.pathname + l.search + l.hash); } catch (e) {}
+        // Never loop: if we are already at the base, just stop here.
+        if (l.pathname !== base) l.replace(base);
+      })();
+    </script>
+  </head>
+  <body>
+    <p style="font-family: system-ui, sans-serif; text-align: center; margin-top: 4rem">
+      Loading TrafficSense... <a href="__BASE__">Open the app</a>
+    </p>
+  </body>
+</html>

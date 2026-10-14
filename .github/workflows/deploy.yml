@@ -1,0 +1,77 @@
+# Build the React frontend and deploy it to GitHub Pages.
+# The site calls the FastAPI backend on Render; if it's asleep or down, the UI uses
+# the precomputed JSON in frontend/public/data/ ("offline mode").
+#
+# One-time setup:
+#   1. Settings > Pages > Build and deployment > Source: GitHub Actions
+#   2. Put your Render URL in RENDER_API_URL below, or (recommended) add a repository
+#      variable: Settings > Secrets and variables > Actions > Variables > New
+#      repository variable  ->  Name: VITE_API_URL  Value: https://<service>.onrender.com
+name: Deploy frontend to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  # Fallback used when the VITE_API_URL repository variable is not set.
+  RENDER_API_URL: https://trafficsense-api.onrender.com
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Regenerate the offline-mode JSON so it always matches the current backend code.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+      - name: Export offline data (frontend/public/data)
+        working-directory: backend
+        run: python -m scripts.export_static
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Build
+        working-directory: frontend
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL || env.RENDER_API_URL }}
+          VITE_BASE: /${{ github.event.repository.name }}/
+        run: npm run build
+
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

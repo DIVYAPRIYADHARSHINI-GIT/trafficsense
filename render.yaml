@@ -1,0 +1,42 @@
+# Render Blueprint for the TrafficSense API (FastAPI) on the free plan.
+# Render dashboard -> New -> Blueprint -> pick this repo. The frontend is NOT hosted
+# here; it is deployed to GitHub Pages by .github/workflows/deploy.yml.
+#
+# Free plan facts (render.com/docs/free): 512 MB RAM, 0.1 CPU, spins down after
+# 15 min idle (~1 min cold start), ephemeral disk. On every start the backend
+# regenerates the 6-month sample, loads it into SQLite and trains the models, so
+# uploaded CSVs are lost whenever the service restarts or sleeps.
+services:
+  - type: web
+    name: trafficsense-api
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.15
+      # Your GitHub Pages origin (no path), e.g. https://octocat.github.io.
+      # Any https://<name>.github.io origin is also accepted by the default regex.
+      - key: GITHUB_PAGES_ORIGIN
+        sync: false
+      # Memory-friendly model size for 512 MB (see backend/app/model.py).
+      - key: TRAFFICSENSE_RF_TREES
+        value: "40"
+      - key: TRAFFICSENSE_RF_MAX_LEAF_NODES
+        value: "2000"
+      - key: TRAFFICSENSE_RF_N_JOBS
+        value: "1"
+      # Keep the native math libraries single-threaded on the 0.1 CPU plan.
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: OPENBLAS_NUM_THREADS
+        value: "1"
+      - key: MKL_NUM_THREADS
+        value: "1"
+      - key: MALLOC_ARENA_MAX
+        value: "2"

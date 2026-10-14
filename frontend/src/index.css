@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { color-scheme: light; }
+  .dark { color-scheme: dark; }
+  html { -webkit-tap-highlight-color: transparent; }
+  body { min-height: 100vh; }
+  input[type='date']::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .7; }
+  .dark input[type='date']::-webkit-calendar-picker-indicator { filter: invert(1); }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-slate-200/80 bg-white p-4 shadow-soft sm:p-5
+           dark:border-slate-800 dark:bg-slate-900;
+  }
+  .card-title { @apply text-base font-semibold text-slate-900 dark:text-slate-100; }
+  .card-subtitle { @apply mt-0.5 text-sm text-slate-500 dark:text-slate-400; }
+  .label { @apply mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300; }
+  .input {
+    @apply block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm
+           outline-none transition placeholder:text-slate-400
+           focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15
+           dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition
+           focus:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply btn bg-gradient-to-r from-brand-600 to-blue-600 text-white shadow-sm hover:from-brand-700 hover:to-blue-700
+           focus-visible:ring-brand-500/30;
+  }
+  .btn-ghost {
+    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50
+           focus-visible:ring-slate-400/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800;
+  }
+  .segmented { @apply inline-flex rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-800 dark:bg-slate-800/60; }
+  .segmented button {
+    @apply rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:text-slate-900
+           dark:text-slate-400 dark:hover:text-white sm:text-sm;
+  }
+  .segmented button[aria-pressed='true'] { @apply bg-white text-brand-700 shadow-sm dark:bg-slate-950 dark:text-brand-300; }
+  .chip { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+}
+
+/* Recharts polish */
+.recharts-default-tooltip { border-radius: 12px !important; }
+.recharts-cartesian-axis-tick-value { font-size: 12px; }
+.recharts-legend-item-text { font-size: 13px; }
+.recharts-surface:focus, .recharts-wrapper:focus, .recharts-sector:focus { outline: none; }
