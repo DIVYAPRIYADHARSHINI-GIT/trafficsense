@@ -24,6 +24,11 @@ services:
       # Any https://<name>.github.io origin is also accepted by the default regex.
       - key: GITHUB_PAGES_ORIGIN
         sync: false
+      # Extra allowed frontend origins, comma-separated, e.g. your Vercel domains:
+      #   https://trafficsense.vercel.app,https://trafficsense-*.vercel.app
+      # ("*" matches one host label, for Vercel preview URLs). No paths, no trailing slash.
+      - key: ALLOWED_ORIGINS
+        sync: false
       # Memory-friendly model size for 512 MB (see backend/app/model.py).
       - key: TRAFFICSENSE_RF_TREES
         value: "40"

@@ -57,7 +57,7 @@ jobs:
         working-directory: frontend
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL || env.RENDER_API_URL }}
-          VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
         run: npm run build
 
       - uses: actions/configure-pages@v6

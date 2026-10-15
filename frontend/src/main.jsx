@@ -5,16 +5,16 @@ import App from './App';
 import { AppProvider } from './lib/AppContext';
 import './index.css';
 
-// GitHub Pages has no server-side routing. public/404.html stores the requested deep
-// link (e.g. /trafficsense/predict) in sessionStorage and redirects to index.html;
-// restore it here before the router reads the URL.
+// Deep links: Vercel rewrites them to index.html (frontend/vercel.json). GitHub Pages has
+// no rewrites, so public/404.html stores the requested path (e.g. /trafficsense/predict)
+// in sessionStorage and redirects to the app shell; restore it before the router reads it.
 const redirect = sessionStorage.getItem('ts-redirect');
 if (redirect) {
   sessionStorage.removeItem('ts-redirect');
   window.history.replaceState(null, '', redirect);
 }
 
-// Vite's BASE_URL is "/trafficsense/" on GitHub Pages and "/" locally.
+// Vite's BASE_URL is "/trafficsense/" on GitHub Pages and "/" on Vercel and locally.
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
 
 ReactDOM.createRoot(document.getElementById('root')).render(

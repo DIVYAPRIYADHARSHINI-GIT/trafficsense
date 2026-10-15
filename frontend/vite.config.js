@@ -3,15 +3,25 @@ import path from 'node:path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Base path: GitHub Pages serves the project site at https://<user>.github.io/trafficsense/,
-// so production builds use "/trafficsense/". Local dev uses "/" (override with VITE_BASE).
+// Public base path (where the app is served from):
+//   VITE_BASE_PATH (or the older VITE_BASE) wins when set, e.g. "/" or "/trafficsense/".
+//   On Vercel (VERCEL=1 is set during builds) the default is "/".
+//   Other production builds default to "/trafficsense/" (GitHub Pages project site,
+//   https://<user>.github.io/trafficsense/). The dev server always defaults to "/".
 //
 // Backend URL: VITE_API_URL (default http://localhost:8000) is baked into the bundle by
-// src/api.js. The GitHub Actions workflow sets it to the Render URL at build time.
-export default defineConfig(({ command, mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-  let base = env.VITE_BASE || (command === 'build' ? '/trafficsense/' : '/');
+// src/api.js. Set it to the Render URL in the GitHub Actions workflow / Vercel project.
+export function resolveBase(command, env) {
+  let base = env.VITE_BASE_PATH || env.VITE_BASE;
+  if (!base) base = command === 'build' && !env.VERCEL ? '/trafficsense/' : '/';
+  if (!base.startsWith('/')) base = `/${base}`;
   if (!base.endsWith('/')) base += '/';
+  return base;
+}
+
+export default defineConfig(({ command, mode }) => {
+  const env = { ...loadEnv(mode, process.cwd(), ''), VERCEL: process.env.VERCEL };
+  const base = resolveBase(command, env);
   return {
     base,
     plugins: [react(), spaFallback(base)],
@@ -28,7 +38,10 @@ export default defineConfig(({ command, mode }) => {
   };
 });
 
-/** Write the real base path into dist/404.html (GitHub Pages deep-link fallback). */
+/**
+ * Write the real base path into dist/404.html (GitHub Pages deep-link fallback).
+ * Vercel ignores this file for routing: frontend/vercel.json rewrites deep links instead.
+ */
 function spaFallback(base) {
   let outDir = 'dist';
   return {
